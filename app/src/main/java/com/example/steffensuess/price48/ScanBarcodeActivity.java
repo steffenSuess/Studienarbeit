@@ -31,6 +31,8 @@ public class ScanBarcodeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scan_barcode);
 
+        cameraPreview = (SurfaceView)findViewById(R.id.camera_preview);
+
         createCameraSource();
     }
 
