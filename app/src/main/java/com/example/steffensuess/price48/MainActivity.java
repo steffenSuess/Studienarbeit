@@ -1,14 +1,14 @@
 package com.example.steffensuess.price48;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.ListAdapter;
+import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,9 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import static com.example.steffensuess.price48.R.id.price;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,9 +30,9 @@ public class MainActivity extends AppCompatActivity {
     String TAG = MainActivity.class.getSimpleName();
     ListView listView;
 
-    ArrayList<HashMap<String, String>> offerList;
+    //ArrayList<HashMap<String, String>> offerList;
 
-    //List<Offer> offerList;
+    List<Offer> offerList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +41,18 @@ public class MainActivity extends AppCompatActivity {
 
         barcodeResult = (TextView)findViewById(R.id.barcode_result);
 
-        offerList =  new ArrayList<HashMap<String, String>>();
+        //offerList =  new ArrayList<HashMap<String, String>>();
+        offerList = new ArrayList<Offer>();
         listView = (ListView)findViewById(R.id.list);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Offer selectedOffer = (Offer) parent.getAdapter().getItem(position);
+                Uri uri = Uri.parse(selectedOffer.getUrl());
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+            }
+        });
 
         //new GetContacts().execute();
     }
@@ -54,9 +62,6 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, 0);
     }
 
-    public void listItemClick(View view){
-
-    }
 
 
     @Override
@@ -162,22 +167,22 @@ public class MainActivity extends AppCompatActivity {
 //                        String office = phone.getString("office");
 
                         // tmp hash map for single contact
-                        HashMap<String, String> offer = new HashMap<>();
-//                        Offer offer = new Offer();
+                        //HashMap<String, String> offer = new HashMap<>();
+                        Offer offer = new Offer();
 //
 //                        // adding each child node to HashMap key => value
-//                        offer.shop_Name = shop_name;
-//                        offer.price = price;
-//                        offer.price_With_Shipping = price_with_shipping;
-//                        offer.currency = currency;
-//                        offer.url = offerURL;
+                        offer.shop_Name = shop_name;
+                        offer.price = price;
+                        offer.price_With_Shipping = price_with_shipping;
+                        offer.currency = currency;
+                        offer.url = offerURL;
 
-                        offer.put("shop_name",shop_name);
-                        offer.put("price", price);
-                        offer.put("price_with_shipping", price_with_shipping);
-                        offer.put("shipping_costs", shipping_costs);
-                        offer.put("currency", currency);
-                        offer.put("url", offerURL);
+//                        offer.put("shop_name",shop_name);
+//                        offer.put("price", price);
+//                        offer.put("price_with_shipping", price_with_shipping);
+//                        offer.put("shipping_costs", shipping_costs);
+//                        offer.put("currency", currency);
+//                        offer.put("url", offerURL);
 
                         // adding contact to offer list
                         offerList.add(offer);
@@ -213,11 +218,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            //ListAdapter adapter = new ArrayAdapter<Offer>(MainActivity.this, R.layout.list_item, offerList);
+            OfferAdapter adapter = new OfferAdapter(MainActivity.this, R.layout.list_item, offerList);
 
-            ListAdapter adapter = new SimpleAdapter(MainActivity.this, offerList,
-                    R.layout.list_item, new String[]{ "shop_name","price_with_shipping"},
-                    new int[]{R.id.shop_name, price});
+//            ListAdapter adapter = new SimpleAdapter(MainActivity.this, offerList,
+//                    R.layout.list_item, new String[]{ "shop_name","price_with_shipping"},
+//                    new int[]{R.id.shop_name, price});
             listView.setAdapter(adapter);
         }
     }
