@@ -22,14 +22,19 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.example.steffensuess.price48.R.id.price;
+
 public class MainActivity extends AppCompatActivity {
 
     TextView barcodeResult;
+    String ean;
 
     String TAG = MainActivity.class.getSimpleName();
     ListView listView;
 
-    ArrayList<HashMap<String, String>> contactList;
+    ArrayList<HashMap<String, String>> offerList;
+
+    //List<Offer> offerList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,16 +43,21 @@ public class MainActivity extends AppCompatActivity {
 
         barcodeResult = (TextView)findViewById(R.id.barcode_result);
 
-        contactList =  new ArrayList<>();
+        offerList =  new ArrayList<HashMap<String, String>>();
         listView = (ListView)findViewById(R.id.list);
 
-        new GetContacts().execute();
+        //new GetContacts().execute();
     }
 
     public void scanBarcode(View view){
         Intent intent = new Intent(this, ScanBarcodeActivity.class);
         startActivityForResult(intent, 0);
     }
+
+    public void listItemClick(View view){
+
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -56,8 +66,11 @@ public class MainActivity extends AppCompatActivity {
                 if(data!=null){
                     Barcode barcode = data.getParcelableExtra("barcode");
                     barcodeResult.setText("Barcode value: " + barcode.displayValue);
+                    ean = barcode.displayValue;
+                    new GetContacts().execute();
                 }else{
                     barcodeResult.setText("No barcode found!");
+                    ean = "";
                 }
             }
 
@@ -78,44 +91,96 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... arg0) {
             HttpHandler sh = new HttpHandler();
-            // Making a request to url and getting response
-            String url = "http://api.androidhive.info/contacts/";
-            String jsonStr = sh.makeServiceCall(url);
 
-            Log.e(TAG, "Response from url: " + jsonStr);
-            if (jsonStr != null) {
+
+
+            JSONObject response = null;
+            BulkRequest bulk = new BulkRequest();
+
+            JSONObject bulkStatus = bulk.request(ean,
+                    "google-shopping", "de", "gtin");
+            String jobId = "";
+            try {
+                jobId = (String) bulkStatus.get("job_id");
+            } catch (JSONException e1) {
+                e1.printStackTrace();
+                //return;
+            }
+
+            Boolean done = false;
+            while (!done) {
                 try {
-                    JSONObject jsonObj = new JSONObject(jsonStr);
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                bulkStatus = bulk.getStatus(jobId);
+
+                Boolean isComplete = false;
+                try {
+                    String status = (String) bulkStatus.get("status");
+                    isComplete = status.equals("finished");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (isComplete) {
+                    response = bulk.getResults(jobId, "json");
+                    done = true;
+                }
+            }
+            System.out.println(response.toString());
+
+
+            // Making a request to url and getting response
+            //String url = "http://api.androidhive.info/contacts/";
+            //String jsonStr = sh.makeServiceCall(url, "GET");
+
+            Log.e(TAG, "Response from url: " + response);
+            if (response != null) {
+                try {
+                    //JSONObject jsonObj = new JSONObject(jsonStr);
 
                     // Getting JSON Array node
-                    JSONArray contacts = jsonObj.getJSONArray("contacts");
 
-                    // looping through All Contacts
+                    JSONObject test = response.getJSONArray("products").getJSONObject(0);
+                    JSONArray contacts = test.getJSONArray("offers");
+
+                    // looping through All Offers
                     for (int i = 0; i < contacts.length(); i++) {
                         JSONObject c = contacts.getJSONObject(i);
-                        String id = c.getString("id");
-                        String name = c.getString("name");
-                        String email = c.getString("email");
-                        String address = c.getString("address");
-                        String gender = c.getString("gender");
+                        String shop_name = c.getString("shop_name");
+                        String price = c.getString("price");
+                        String price_with_shipping = c.getString("price_with_shipping");
+                        String shipping_costs = c.getString("shipping_costs");
+                        String currency = c.getString("currency");
+                        String offerURL = c.getString("url");
 
                         // Phone node is JSON Object
-                        JSONObject phone = c.getJSONObject("phone");
-                        String mobile = phone.getString("mobile");
-                        String home = phone.getString("home");
-                        String office = phone.getString("office");
+//                        JSONObject phone = c.getJSONObject("phone");
+//                        String mobile = phone.getString("mobile");
+//                        String home = phone.getString("home");
+//                        String office = phone.getString("office");
 
                         // tmp hash map for single contact
-                        HashMap<String, String> contact = new HashMap<>();
+                        HashMap<String, String> offer = new HashMap<>();
+//                        Offer offer = new Offer();
+//
+//                        // adding each child node to HashMap key => value
+//                        offer.shop_Name = shop_name;
+//                        offer.price = price;
+//                        offer.price_With_Shipping = price_with_shipping;
+//                        offer.currency = currency;
+//                        offer.url = offerURL;
 
-                        // adding each child node to HashMap key => value
-                        contact.put("id", id);
-                        contact.put("name", name);
-                        contact.put("email", email);
-                        contact.put("mobile", mobile);
+                        offer.put("shop_name",shop_name);
+                        offer.put("price", price);
+                        offer.put("price_with_shipping", price_with_shipping);
+                        offer.put("shipping_costs", shipping_costs);
+                        offer.put("currency", currency);
+                        offer.put("url", offerURL);
 
-                        // adding contact to contact list
-                        contactList.add(contact);
+                        // adding contact to offer list
+                        offerList.add(offer);
                     }
                 } catch (final JSONException e) {
                     Log.e(TAG, "Json parsing error: " + e.getMessage());
@@ -148,9 +213,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-            ListAdapter adapter = new SimpleAdapter(MainActivity.this, contactList,
-                    R.layout.list_item, new String[]{ "email","mobile"},
-                    new int[]{R.id.email, R.id.mobile});
+            //ListAdapter adapter = new ArrayAdapter<Offer>(MainActivity.this, R.layout.list_item, offerList);
+
+            ListAdapter adapter = new SimpleAdapter(MainActivity.this, offerList,
+                    R.layout.list_item, new String[]{ "shop_name","price_with_shipping"},
+                    new int[]{R.id.shop_name, price});
             listView.setAdapter(adapter);
         }
     }

@@ -3,16 +3,17 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/activity_horizontal_margin">
+    android:padding="@dimen/activity_horizontal_margin"
+    android:onClick="listItemClick">
     <TextView
-        android:id="@+id/email"
+        android:id="@+id/shop_name"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="2dip"
         android:textColor="@color/colorAccent" />
 
     <TextView
-        android:id="@+id/mobile"
+        android:id="@+id/price"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#5d5d5d"
