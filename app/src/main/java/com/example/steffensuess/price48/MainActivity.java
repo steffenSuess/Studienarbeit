@@ -1,37 +1,28 @@
 package com.example.steffensuess.price48;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.ListView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     TextView barcodeResult;
     String ean;
 
-    String TAG = MainActivity.class.getSimpleName();
-    ListView listView;
+    Menu optionsMenu;
 
-    //ArrayList<HashMap<String, String>> offerList;
 
-    List<Offer> offerList;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,17 +31,36 @@ public class MainActivity extends AppCompatActivity {
 
         barcodeResult = (TextView)findViewById(R.id.barcode_result);
 
-        //offerList =  new ArrayList<HashMap<String, String>>();
-        offerList = new ArrayList<Offer>();
-        listView = (ListView)findViewById(R.id.list);
-
-
-        //new GetContacts().execute();
     }
 
-    public void scanBarcode(View view){
-        Intent intent = new Intent(this, ScanBarcodeActivity.class);
-        startActivityForResult(intent, 0);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        optionsMenu = menu;
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.barcode_search:
+                Intent intent = new Intent(this, ScanBarcodeActivity.class);
+                startActivityForResult(intent, 0);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 
@@ -63,7 +73,11 @@ public class MainActivity extends AppCompatActivity {
                     Barcode barcode = data.getParcelableExtra("barcode");
                     barcodeResult.setText("Barcode value: " + barcode.displayValue);
                     ean = barcode.displayValue;
-                    new GetContacts().execute();
+                    SearchView searchView =
+                            (SearchView) optionsMenu.findItem(R.id.search).getActionView();
+                    searchView.setQuery(ean, false);
+                    searchView.setIconified(false);
+                    //new GetContacts().execute();
                 }else{
                     barcodeResult.setText("No barcode found!");
                     ean = "";
@@ -76,157 +90,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private class GetContacts extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Toast.makeText(MainActivity.this,"Json Data is downloading",Toast.LENGTH_LONG).show();
 
-        }
-
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            HttpHandler sh = new HttpHandler();
-
-
-
-            JSONObject response = null;
-            BulkRequest bulk = new BulkRequest();
-
-            JSONObject bulkStatus = bulk.request(ean,
-                    "google-shopping", "de", "gtin");
-            String jobId = "";
-            try {
-                jobId = (String) bulkStatus.get("job_id");
-            } catch (JSONException e1) {
-                e1.printStackTrace();
-                //return;
-            }
-
-            Boolean done = false;
-            while (!done) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                bulkStatus = bulk.getStatus(jobId);
-
-                Boolean isComplete = false;
-                try {
-                    String status = (String) bulkStatus.get("status");
-                    isComplete = status.equals("finished");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                if (isComplete) {
-                    response = bulk.getResults(jobId, "json");
-                    done = true;
-                }
-            }
-            System.out.println(response.toString());
-
-
-            // Making a request to url and getting response
-            //String url = "http://api.androidhive.info/contacts/";
-            //String jsonStr = sh.makeServiceCall(url, "GET");
-
-            Log.e(TAG, "Response from url: " + response);
-            if (response != null) {
-                try {
-                    //JSONObject jsonObj = new JSONObject(jsonStr);
-
-                    // Getting JSON Array node
-
-                    JSONObject products = response.getJSONArray("products").getJSONObject(0);
-                    String imageURL = products.getString("image_url");
-                    String productName = products.getString("name");
-                    JSONArray offers = products.getJSONArray("offers");
-
-                    // looping through All Offers
-                    for (int i = 0; i < offers.length(); i++) {
-                        JSONObject c = offers.getJSONObject(i);
-                        String shop_name = c.getString("shop_name");
-                        String price = c.getString("price");
-                        String price_with_shipping = c.getString("price_with_shipping");
-                        String shipping_costs = c.getString("shipping_costs");
-                        String currency = c.getString("currency");
-                        String offerURL = c.getString("url");
-
-                        // Phone node is JSON Object
-//                        JSONObject phone = c.getJSONObject("phone");
-//                        String mobile = phone.getString("mobile");
-//                        String home = phone.getString("home");
-//                        String office = phone.getString("office");
-
-                        // tmp hash map for single contact
-                        //HashMap<String, String> offer = new HashMap<>();
-                        Offer offer = new Offer();
-//
-//                        // adding each child node to HashMap key => value
-                        offer.setProductName(productName);
-                        offer.setProductImage(imageURL);
-                        offer.shop_Name = shop_name;
-                        offer.price = price;
-                        offer.price_With_Shipping = price_with_shipping;
-                        offer.currency = currency;
-                        offer.url = offerURL;
-
-//                        offer.put("shop_name",shop_name);
-//                        offer.put("price", price);
-//                        offer.put("price_with_shipping", price_with_shipping);
-//                        offer.put("shipping_costs", shipping_costs);
-//                        offer.put("currency", currency);
-//                        offer.put("url", offerURL);
-
-                        // adding contact to offer list
-                        offerList.add(offer);
-                    }
-                } catch (final JSONException e) {
-                    Log.e(TAG, "Json parsing error: " + e.getMessage());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(),
-                                    "Json parsing error: " + e.getMessage(),
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                }
-
-            } else {
-                Log.e(TAG, "Couldn't get json from server.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(),
-                                "Couldn't get json from server. Check LogCat for possible errors!",
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            OfferAdapter adapter = new OfferAdapter(MainActivity.this, R.layout.list_item, offerList);
-
-//            ListAdapter adapter = new SimpleAdapter(MainActivity.this, offerList,
-//                    R.layout.list_item, new String[]{ "shop_name","price_with_shipping"},
-//                    new int[]{R.id.shop_name, price});
-            //listView.setAdapter(adapter);
-            Intent intent = new Intent(getApplicationContext(), ResultsActivity.class);
-            intent.putExtra("offerList", (Serializable) offerList);
-            intent.putExtra("productName", offerList.get(0).getProductName());
-            intent.putExtra("productImage", offerList.get(0).getProductImage());
-//            ListView test = (ListView) findViewById(R.id.result_list);
-//            test.setAdapter(adapter);
-            startActivity(intent);
-        }
-    }
 
     }
