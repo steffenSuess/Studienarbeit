@@ -3,7 +3,8 @@
     package="com.example.steffensuess.price48">
 
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,7 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ScanBarcodeActivity"/>
+        <activity android:name=".ScanBarcodeActivity" />
+        <activity android:name=".ResultsActivity"></activity>
     </application>
 
 </manifest>

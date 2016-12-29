@@ -1,13 +1,11 @@
 package com.example.steffensuess.price48;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,15 +43,7 @@ public class MainActivity extends AppCompatActivity {
         //offerList =  new ArrayList<HashMap<String, String>>();
         offerList = new ArrayList<Offer>();
         listView = (ListView)findViewById(R.id.list);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Offer selectedOffer = (Offer) parent.getAdapter().getItem(position);
-                Uri uri = Uri.parse(selectedOffer.getUrl());
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            }
-        });
+
 
         //new GetContacts().execute();
     }
@@ -147,12 +138,14 @@ public class MainActivity extends AppCompatActivity {
 
                     // Getting JSON Array node
 
-                    JSONObject test = response.getJSONArray("products").getJSONObject(0);
-                    JSONArray contacts = test.getJSONArray("offers");
+                    JSONObject products = response.getJSONArray("products").getJSONObject(0);
+                    String imageURL = products.getString("image_url");
+                    String productName = products.getString("name");
+                    JSONArray offers = products.getJSONArray("offers");
 
                     // looping through All Offers
-                    for (int i = 0; i < contacts.length(); i++) {
-                        JSONObject c = contacts.getJSONObject(i);
+                    for (int i = 0; i < offers.length(); i++) {
+                        JSONObject c = offers.getJSONObject(i);
                         String shop_name = c.getString("shop_name");
                         String price = c.getString("price");
                         String price_with_shipping = c.getString("price_with_shipping");
@@ -171,6 +164,8 @@ public class MainActivity extends AppCompatActivity {
                         Offer offer = new Offer();
 //
 //                        // adding each child node to HashMap key => value
+                        offer.setProductName(productName);
+                        offer.setProductImage(imageURL);
                         offer.shop_Name = shop_name;
                         offer.price = price;
                         offer.price_With_Shipping = price_with_shipping;
@@ -223,7 +218,14 @@ public class MainActivity extends AppCompatActivity {
 //            ListAdapter adapter = new SimpleAdapter(MainActivity.this, offerList,
 //                    R.layout.list_item, new String[]{ "shop_name","price_with_shipping"},
 //                    new int[]{R.id.shop_name, price});
-            listView.setAdapter(adapter);
+            //listView.setAdapter(adapter);
+            Intent intent = new Intent(getApplicationContext(), ResultsActivity.class);
+            intent.putExtra("offerList", (Serializable) offerList);
+            intent.putExtra("productName", offerList.get(0).getProductName());
+            intent.putExtra("productImage", offerList.get(0).getProductImage());
+//            ListView test = (ListView) findViewById(R.id.result_list);
+//            test.setAdapter(adapter);
+            startActivity(intent);
         }
     }
 

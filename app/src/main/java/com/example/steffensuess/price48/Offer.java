@@ -1,15 +1,39 @@
 package com.example.steffensuess.price48;
 
+import java.io.Serializable;
+
 /**
  * Created by steffensuess on 19.12.16.
  */
 
-public class Offer {
+public class Offer implements Serializable{
     String shop_Name;
     String price;
     String price_With_Shipping;
     String currency;
     String url;
+    String productName;
+    String productImage;
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+
+
+    public String getProductImage() {
+        return productImage;
+    }
+
+    public void setProductImage(String productImage) {
+        this.productImage = productImage;
+    }
+
+
 
     public String getShop_Name() {
         return shop_Name;
