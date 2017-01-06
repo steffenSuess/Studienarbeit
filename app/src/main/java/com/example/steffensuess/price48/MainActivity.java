@@ -9,14 +9,12 @@ import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView barcodeResult;
     String ean;
 
     Menu optionsMenu;
@@ -29,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        barcodeResult = (TextView)findViewById(R.id.barcode_result);
+
 
     }
 
@@ -71,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             if(resultCode== CommonStatusCodes.SUCCESS){
                 if(data!=null){
                     Barcode barcode = data.getParcelableExtra("barcode");
-                    barcodeResult.setText("Barcode value: " + barcode.displayValue);
                     ean = barcode.displayValue;
                     SearchView searchView =
                             (SearchView) optionsMenu.findItem(R.id.search).getActionView();
@@ -79,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
                     searchView.setIconified(false);
                     //new GetContacts().execute();
                 }else{
-                    barcodeResult.setText("No barcode found!");
                     ean = "";
                 }
             }
