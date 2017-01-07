@@ -2,8 +2,6 @@ package com.example.steffensuess.price48;
 
 import android.app.SearchManager;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,19 +20,24 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
 public class ResultsActivity extends AppCompatActivity {
 
     String searchText;
+
+
+    DatabaseHandler db;
 
     ListView listView;
     TextView productName;
@@ -49,10 +52,11 @@ public class ResultsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
-        handleIntent(getIntent());
         listView = (ListView) findViewById(R.id.result_list);
         productName = (TextView) findViewById(R.id.product_name);
-
+        productImage = (ImageView) findViewById(R.id.product_image);
+        db = new DatabaseHandler(this);
+        handleIntent(getIntent());
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -72,7 +76,7 @@ public class ResultsActivity extends AppCompatActivity {
     }
 
     private void handleIntent(Intent intent) {
-        productImage = (ImageView) findViewById(R.id.product_image);
+
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
@@ -91,6 +95,12 @@ public class ResultsActivity extends AppCompatActivity {
             refreshInterval = 1000;
             new GetOffers().execute();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        db.close();
+        super.onDestroy();
     }
 
     private boolean searchTextIsEANNumber(String searchText) {
@@ -216,6 +226,23 @@ public class ResultsActivity extends AppCompatActivity {
             productName.setText(name);
             OfferAdapter adapter = new OfferAdapter(ResultsActivity.this, R.layout.list_item, offerList);
             listView.setAdapter(adapter);
+
+            if(offerList.size()>0){
+                Offer cheapestOffer = new Offer();
+                cheapestOffer = offerList.get(0);
+                SearchQuery searchQuery = new SearchQuery();
+                searchQuery.setProductName(name);
+                searchQuery.setImageURL(noImageFoundURL);
+                searchQuery.setShopName(cheapestOffer.getShop_Name());
+                searchQuery.setSearchText(searchText);
+                searchQuery.setPrice(cheapestOffer.getPrice());
+                Calendar today = Calendar.getInstance();
+                today.set(Calendar.HOUR_OF_DAY, 0);
+                Date date = today.getTime();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                searchQuery.setDate(dateFormat.format(date));
+                db.addQuery(searchQuery);
+            }
             if(searchTextIsEANNumber(searchText))
                 searchText = name;
             new GetProductImage().execute();
@@ -283,45 +310,13 @@ public class ResultsActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(!imageURL.equals(null) && !imageURL.isEmpty() && !imageURL.equals("null"))
+            if(!imageURL.equals(null) && !imageURL.isEmpty() && !imageURL.equals("null")){
                 new ImageLoadTask(imageURL, productImage).execute();
-        }
-    }
-
-
-    private class ImageLoadTask extends AsyncTask<Void, Void, Bitmap> {
-
-        private String url;
-        private ImageView imageView;
-
-        public ImageLoadTask(String url, ImageView imageView) {
-            this.url = url;
-            this.imageView = imageView;
-        }
-
-        @Override
-        protected Bitmap doInBackground(Void... params) {
-            try {
-                URL urlConnection = new URL(url);
-                HttpURLConnection connection = (HttpURLConnection) urlConnection
-                        .openConnection();
-                connection.setDoInput(true);
-                connection.connect();
-                InputStream input = connection.getInputStream();
-                Bitmap myBitmap = BitmapFactory.decodeStream(input);
-                System.out.println("Bitmap returned");
-                return myBitmap;
-            } catch (Exception e) {
-                System.out.println("Exception " + e.getMessage());
-                e.printStackTrace();
+                SearchQuery searchQuery = new SearchQuery();
+                searchQuery = db.getQuery(db.getQueriesCount());
+                searchQuery.setImageURL(imageURL);
+                db.updateQuery(searchQuery);
             }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap result) {
-            super.onPostExecute(result);
-            imageView.setImageBitmap(result);
         }
     }
 

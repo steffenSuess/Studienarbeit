@@ -4,4 +4,5 @@
     <string name="search_hint">Suche</string>
     <string name="barcode_search">Suche</string>
     <string name="availability">Verfügbarkeit:</string>
+    <string name="call_date">Abrufdatum:</string>
 </resources>
