@@ -52,12 +52,7 @@ public class ResultsActivity extends AppCompatActivity {
         handleIntent(getIntent());
         listView = (ListView) findViewById(R.id.result_list);
         productName = (TextView) findViewById(R.id.product_name);
-        //Intent intent = getIntent();
 
-//        ArrayList<Offer> offerList = new ArrayList<Offer>();
-//        offerList = (ArrayList<Offer>) intent.getSerializableExtra("offerList");
-//        OfferAdapter adapter = new OfferAdapter(ResultsActivity.this, R.layout.list_item, offerList);
-//        listView.setAdapter(adapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -159,12 +154,6 @@ public class ResultsActivity extends AppCompatActivity {
             }
             System.out.println(response.toString());
 
-
-            // Making a request to url and getting response
-            //String url = "http://api.androidhive.info/contacts/";
-            //String jsonStr = sh.makeServiceCall(url, "GET");
-
-//            Log.e(TAG, "Response from url: " + response);
             if (response != null) {
                 try {
 
@@ -177,21 +166,17 @@ public class ResultsActivity extends AppCompatActivity {
                     for (int i = 0; i < offers.length(); i++) {
                         JSONObject c = offers.getJSONObject(i);
                         String shop_name = c.getString("shop_name");
-                        String price = c.getString("price");
-                        String price_with_shipping = c.getString("price_with_shipping");
-                        String shipping_costs = c.getString("shipping_costs");
-                        String currency = c.getString("currency");
-                        String offerURL = c.getString("url");
-
 
                         Offer offer = new Offer();
 
                         offer.setProductName(name);
                         offer.setShop_Name(shop_name);
-                        offer.setPrice(price);
-                        offer.setPrice_With_Shipping(price_with_shipping);
-                        offer.setCurrency(currency);
-                        offer.setUrl(offerURL);
+                        offer.setPrice(c.getString("price"));
+                        offer.setPrice_With_Shipping(c.getString("price_with_shipping"));
+                        offer.setCurrency(c.getString("currency"));
+                        offer.setUrl(c.getString("url"));
+                        offer.setCost_For_Shipping(c.getString("shipping_costs"));
+                        offer.setAvailability(c.getString("availability_code"));
 
 
                         // adding offer to offer list
@@ -231,6 +216,8 @@ public class ResultsActivity extends AppCompatActivity {
             productName.setText(name);
             OfferAdapter adapter = new OfferAdapter(ResultsActivity.this, R.layout.list_item, offerList);
             listView.setAdapter(adapter);
+            if(searchTextIsEANNumber(searchText))
+                searchText = name;
             new GetProductImage().execute();
         }
     }

@@ -2,10 +2,12 @@ package com.example.steffensuess.price48;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.res.ResourcesCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -33,10 +35,25 @@ public class OfferAdapter extends ArrayAdapter<Offer> {
             if(offer != null){
                 TextView price = (TextView) view.findViewById(R.id.price);
                 TextView shop_name = (TextView) view.findViewById(R.id.shop_name);
+                TextView shipping = (TextView) view.findViewById(R.id.shipping);
+                ImageView availability = (ImageView) view.findViewById(R.id.availability_image);
 
-                if (price != null && shop_name != null){
-                    price.setText(offer.getPrice());
+                if (price != null && shop_name != null && shipping != null && availability != null){
+                    price.setText(offer.getPrice() + " " + offer.getCurrency().replace("EUR", "€"));
                     shop_name.setText(offer.getShop_Name());
+                    shipping.setText("Versand ab: " + offer.getCost_For_Shipping() + " " + offer.getCurrency().replace("EUR", "€"));
+
+                    switch (offer.getAvailability()){
+                        case "green":
+                            availability.setImageDrawable(ResourcesCompat.getDrawable(getContext().getResources(), R.drawable.ic_shopping_cart_green, null));
+                            break;
+                        case "yellow":
+                            availability.setImageDrawable(ResourcesCompat.getDrawable(getContext().getResources(), R.drawable.ic_shopping_cart_yellow, null));
+                            break;
+                        default:
+                            availability.setImageDrawable(ResourcesCompat.getDrawable(getContext().getResources(), R.drawable.ic_remove_shopping_cart, null));
+                            break;
+                    }
                 }
             }
 
