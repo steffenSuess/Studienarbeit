@@ -1,4 +1,4 @@
-package com.example.steffensuess.price48;
+package com.example.steffensuess.price48.Models;
 
 /**
  * Created by steffensuess on 07.01.17.

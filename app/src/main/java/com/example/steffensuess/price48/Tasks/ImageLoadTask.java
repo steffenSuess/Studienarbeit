@@ -1,4 +1,4 @@
-package com.example.steffensuess.price48;
+package com.example.steffensuess.price48.Tasks;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

@@ -1,4 +1,4 @@
-package com.example.steffensuess.price48;
+package com.example.steffensuess.price48.Activities;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -10,8 +10,14 @@ import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.example.steffensuess.price48.DatabaseHandling.DatabaseHandler;
+import com.example.steffensuess.price48.Models.SearchQuery;
+import com.example.steffensuess.price48.R;
+import com.example.steffensuess.price48.ListAdapters.SearchQueriesAdapter;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
@@ -25,8 +31,6 @@ public class MainActivity extends AppCompatActivity {
     Menu optionsMenu;
     DatabaseHandler db;
     List<SearchQuery> searchQueries;
-
-
 
 
     @Override
@@ -46,6 +50,17 @@ public class MainActivity extends AppCompatActivity {
             SearchQueriesAdapter adapter = new SearchQueriesAdapter(MainActivity.this, R.layout.query_list_item, searchQueryList);
             listView.setAdapter(adapter);
         }
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SearchQuery selectedSearchQuery = (SearchQuery) parent.getAdapter().getItem(position);
+                SearchView searchView =
+                        (SearchView) optionsMenu.findItem(R.id.search).getActionView();
+                searchView.setQuery(selectedSearchQuery.getSearchText(), true);
+                db.deleteQuery(selectedSearchQuery);
+            }
+        });
     }
 
     @Override
@@ -96,9 +111,8 @@ public class MainActivity extends AppCompatActivity {
                     ean = barcode.displayValue;
                     SearchView searchView =
                             (SearchView) optionsMenu.findItem(R.id.search).getActionView();
-                    searchView.setQuery(ean, false);
-                    searchView.setIconified(false);
-                    //new GetContacts().execute();
+                    searchView.setQuery(ean, true);
+
                 }else{
                     ean = "";
                 }
@@ -107,6 +121,12 @@ public class MainActivity extends AppCompatActivity {
         }else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        db.close();
+        super.onDestroy();
     }
 
 

@@ -1,10 +1,12 @@
-package com.example.steffensuess.price48;
+package com.example.steffensuess.price48.DatabaseHandling;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.example.steffensuess.price48.Models.SearchQuery;
 
 import java.util.ArrayList;
 import java.util.List;

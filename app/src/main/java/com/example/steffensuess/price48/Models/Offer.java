@@ -1,4 +1,4 @@
-package com.example.steffensuess.price48;
+package com.example.steffensuess.price48.Models;
 
 import java.io.Serializable;
 

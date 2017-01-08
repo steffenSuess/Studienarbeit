@@ -1,4 +1,4 @@
-package com.example.steffensuess.price48;
+package com.example.steffensuess.price48.Activities;
 
 import android.Manifest;
 import android.app.Activity;
@@ -10,6 +10,7 @@ import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.example.steffensuess.price48.R;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;

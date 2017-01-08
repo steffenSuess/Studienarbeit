@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
     android:weightSum="7"
-    tools:context="com.example.steffensuess.price48.ResultsActivity">
+    tools:context="com.example.steffensuess.price48.Activities.ResultsActivity">
 
     <LinearLayout
         android:id="@+id/result_header"
@@ -28,7 +28,7 @@
         <TextView
             android:id="@+id/product_name"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textStyle="bold"
             android:textColor="@color/colorPrimaryDark"

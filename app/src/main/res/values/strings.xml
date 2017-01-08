@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">Price48</string>
     <string name="search_title">Suche</string>
-    <string name="search_hint">Suche</string>
     <string name="barcode_search">Suche</string>
     <string name="availability">Verfügbarkeit:</string>
     <string name="call_date">Abrufdatum:</string>
+    <string name="last_searches">Letzte Suchanfragen:</string>
+    <string name="search_hint">Suche</string>
+    <string name="scanning_barcodes">Scannen:</string>
 </resources>

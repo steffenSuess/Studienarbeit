@@ -1,4 +1,4 @@
-package com.example.steffensuess.price48;
+package com.example.steffensuess.price48.HttpRequestHandling;
 
 import org.json.JSONException;
 import org.json.JSONObject;

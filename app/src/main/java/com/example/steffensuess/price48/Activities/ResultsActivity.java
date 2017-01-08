@@ -1,10 +1,13 @@
-package com.example.steffensuess.price48;
+package com.example.steffensuess.price48.Activities;
 
+import android.app.ProgressDialog;
 import android.app.SearchManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.view.View;
@@ -13,6 +16,14 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.steffensuess.price48.HttpRequestHandling.BulkRequest;
+import com.example.steffensuess.price48.DatabaseHandling.DatabaseHandler;
+import com.example.steffensuess.price48.Tasks.ImageLoadTask;
+import com.example.steffensuess.price48.Models.Offer;
+import com.example.steffensuess.price48.Models.SearchQuery;
+import com.example.steffensuess.price48.ListAdapters.OfferAdapter;
+import com.example.steffensuess.price48.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,16 +56,33 @@ public class ResultsActivity extends AppCompatActivity {
     String key;
     String name;
     int refreshInterval;
+    ProgressDialog progressDialog;
+    AlertDialog alertDialog;
     final static String noImageFoundURL = "http://www.jordans.com/~/media/jordans%20redesign/no-image-found.ashx?h=275&la=en&w=275&hash=F87BC23F17E37D57E2A0B1CC6E2E3EEE312AAD5B";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_results);
         listView = (ListView) findViewById(R.id.result_list);
         productName = (TextView) findViewById(R.id.product_name);
         productImage = (ImageView) findViewById(R.id.product_image);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Loading");
+        progressDialog.setMessage("Please wait while data is loading...");
+        progressDialog.setCancelable(false);
+        alertDialog = new AlertDialog.Builder(ResultsActivity.this).create();
+        alertDialog.setTitle("Problem");
+        alertDialog.setMessage("Für Ihre Anfrage wurden leider keine Daten gefunden");
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        finish();
+                    }
+                });
         db = new DatabaseHandler(this);
         handleIntent(getIntent());
 
@@ -120,7 +148,7 @@ public class ResultsActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            Toast.makeText(ResultsActivity.this,"Json Data is downloading",Toast.LENGTH_LONG).show();
+            progressDialog.show();
             offerList = new ArrayList<Offer>();
         }
 
@@ -205,16 +233,6 @@ public class ResultsActivity extends AppCompatActivity {
 
                 }
 
-            } else {
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(),
-                                "Couldn't get json from server. Check LogCat for possible errors!",
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
             }
 
             return null;
@@ -223,11 +241,12 @@ public class ResultsActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void result) {
 
-            productName.setText(name);
-            OfferAdapter adapter = new OfferAdapter(ResultsActivity.this, R.layout.list_item, offerList);
-            listView.setAdapter(adapter);
 
+            progressDialog.dismiss();
             if(offerList.size()>0){
+                productName.setText(name);
+                OfferAdapter adapter = new OfferAdapter(ResultsActivity.this, R.layout.list_item, offerList);
+                listView.setAdapter(adapter);
                 Offer cheapestOffer = new Offer();
                 cheapestOffer = offerList.get(0);
                 SearchQuery searchQuery = new SearchQuery();
@@ -242,7 +261,10 @@ public class ResultsActivity extends AppCompatActivity {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
                 searchQuery.setDate(dateFormat.format(date));
                 db.addQuery(searchQuery);
+            }else {
+                alertDialog.show();
             }
+
             if(searchTextIsEANNumber(searchText))
                 searchText = name;
             new GetProductImage().execute();
@@ -258,12 +280,12 @@ public class ResultsActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            //search = search.replace(" ", "%20");
+            String search = searchText.replace(" ", "%20");
             String accountKey = "9a2f826a855140eca2e6357bc0238b2f";
             byte[] accountKeyBytes = Base64.encode(accountKey.getBytes(), Base64.DEFAULT);
             String accountKeyEnc = new String(accountKeyBytes);
             try {
-                URL url = new URL("https://api.cognitive.microsoft.com/bing/v5.0/images/search?q="+searchText+"&count="+count+"&offset=0&mkt="+mkt+"&safeSearch=Moderate&imageType=Transparent");
+                URL url = new URL("https://api.cognitive.microsoft.com/bing/v5.0/images/search?q="+search+"&count="+count+"&offset=0&mkt="+mkt+"&safeSearch=Moderate&imageType=Transparent");
 
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -271,6 +293,8 @@ public class ResultsActivity extends AppCompatActivity {
 
 
                 int status = urlConnection.getResponseCode();
+
+                System.out.println("Status: " + status + " " +  urlConnection.getErrorStream());
 
 
 
@@ -310,10 +334,10 @@ public class ResultsActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(!imageURL.equals(null) && !imageURL.isEmpty() && !imageURL.equals("null")){
+            if(imageURL != null && !imageURL.isEmpty() && !imageURL.equals("null")){
                 new ImageLoadTask(imageURL, productImage).execute();
-                SearchQuery searchQuery = new SearchQuery();
-                searchQuery = db.getQuery(db.getQueriesCount());
+                SearchQuery searchQuery;
+                searchQuery = db.getAllQueries().get(db.getQueriesCount()-1);
                 searchQuery.setImageURL(imageURL);
                 db.updateQuery(searchQuery);
             }
