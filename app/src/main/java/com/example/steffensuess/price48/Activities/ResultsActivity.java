@@ -76,7 +76,7 @@ public class ResultsActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
         alertDialog = new AlertDialog.Builder(ResultsActivity.this).create();
         alertDialog.setTitle("Problem");
-        alertDialog.setMessage("Für Ihre Anfrage wurden leider keine Daten gefunden");
+        alertDialog.setMessage("Für Ihre Anfrage wurden leider keine Daten gefunden!");
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "OK",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
