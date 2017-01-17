@@ -15,9 +15,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.steffensuess.price48.DatabaseHandling.DatabaseHandler;
+import com.example.steffensuess.price48.ListAdapters.SearchQueriesAdapter;
 import com.example.steffensuess.price48.Models.SearchQuery;
 import com.example.steffensuess.price48.R;
-import com.example.steffensuess.price48.ListAdapters.SearchQueriesAdapter;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
@@ -65,9 +65,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onRestart() {
-        super.onRestart();
-        finish();
-        startActivity(getIntent());
+            super.onRestart();
+            finish();
+            startActivity(getIntent());
     }
 
     @Override
@@ -109,9 +109,13 @@ public class MainActivity extends AppCompatActivity {
                 if(data!=null){
                     Barcode barcode = data.getParcelableExtra("barcode");
                     ean = barcode.displayValue;
-                    SearchView searchView =
-                            (SearchView) optionsMenu.findItem(R.id.search).getActionView();
-                    searchView.setQuery(ean, true);
+//                    SearchView searchView =
+//                            (SearchView) optionsMenu.findItem(R.id.search).getActionView();
+//                    searchView.setQuery(ean, true);
+                    Intent intent = new Intent(this, ResultsActivity.class);
+                    intent.putExtra("searchText", ean);
+                    startActivity(intent);
+                    finish();
 
                 }else{
                     ean = "";

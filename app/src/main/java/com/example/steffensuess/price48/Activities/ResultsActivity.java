@@ -9,21 +9,21 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Base64;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.steffensuess.price48.HttpRequestHandling.BulkRequest;
 import com.example.steffensuess.price48.DatabaseHandling.DatabaseHandler;
-import com.example.steffensuess.price48.Tasks.ImageLoadTask;
+import com.example.steffensuess.price48.HttpRequestHandling.BulkRequest;
+import com.example.steffensuess.price48.ListAdapters.OfferAdapter;
 import com.example.steffensuess.price48.Models.Offer;
 import com.example.steffensuess.price48.Models.SearchQuery;
-import com.example.steffensuess.price48.ListAdapters.OfferAdapter;
 import com.example.steffensuess.price48.R;
+import com.example.steffensuess.price48.Tasks.ImageLoadTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,10 +68,11 @@ public class ResultsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_results);
         listView = (ListView) findViewById(R.id.result_list);
         productName = (TextView) findViewById(R.id.product_name);
+        productName.setMovementMethod(new ScrollingMovementMethod());
         productImage = (ImageView) findViewById(R.id.product_image);
         progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Loading");
-        progressDialog.setMessage("Please wait while data is loading...");
+        progressDialog.setTitle("Lädt...");
+        progressDialog.setMessage("Bitte warten, während die Daten aus dem Internet geladen werden");
         progressDialog.setCancelable(false);
         alertDialog = new AlertDialog.Builder(ResultsActivity.this).create();
         alertDialog.setTitle("Problem");
@@ -113,6 +114,11 @@ public class ResultsActivity extends AppCompatActivity {
             searchText = query;
         }
 
+        else{
+            String message = intent.getStringExtra("searchText");
+            searchText = message;
+        }
+
         if(searchText != null) {
             if(searchTextIsEANNumber(searchText)){
                 key = "gtin";
@@ -139,6 +145,13 @@ public class ResultsActivity extends AppCompatActivity {
         catch (Exception e){
             return false;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(ResultsActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private class GetOffers extends AsyncTask<Void, Void, Void> {
@@ -222,14 +235,6 @@ public class ResultsActivity extends AppCompatActivity {
                     }
                 } catch (final JSONException e) {
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getApplicationContext(),
-                                    "Json parsing error: " + e.getMessage(),
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    });
 
                 }
 
@@ -261,13 +266,14 @@ public class ResultsActivity extends AppCompatActivity {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
                 searchQuery.setDate(dateFormat.format(date));
                 db.addQuery(searchQuery);
+                if(searchTextIsEANNumber(searchText))
+                    searchText = name;
+                new GetProductImage().execute();
             }else {
                 alertDialog.show();
             }
 
-            if(searchTextIsEANNumber(searchText))
-                searchText = name;
-            new GetProductImage().execute();
+
         }
     }
 
@@ -277,6 +283,7 @@ public class ResultsActivity extends AppCompatActivity {
 
         JSONObject imageJson;
         String imageURL;
+
 
         @Override
         protected Void doInBackground(Void... params) {
