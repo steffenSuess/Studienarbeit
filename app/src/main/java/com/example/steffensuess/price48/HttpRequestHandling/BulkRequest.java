@@ -20,42 +20,6 @@ public class BulkRequest {
     private String token = "BRNRIIEICXPVACWUNHLLLNBANKQXHVSPGGCGFSSMXQBQXJYINFMOLSPSYPBKDIOV";
     private static Integer refreshInterval = 30000;
 
-    /*public static void main(String[] args) {
-        JSONObject response = null;
-        BulkRequest bulk = new BulkRequest();
-        JSONObject bulkStatus = bulk.request("00885909666966\n08718108041581",
-                "google-shopping", "de", "gtin");
-        String jobId = "";
-        try {
-            jobId = (String) bulkStatus.get("job_id");
-        } catch (JSONException e1) {
-            e1.printStackTrace();
-            return;
-        }
-
-        Boolean done = false;
-        while (!done) {
-            try {
-                Thread.sleep(refreshInterval);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            bulkStatus = bulk.getStatus(jobId);
-
-            Boolean isComplete = false;
-            try {
-                String status = (String) bulkStatus.get("status");
-                isComplete = status.equals("finished");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            if (isComplete) {
-                response = bulk.getResults(jobId, "json");
-                done = true;
-            }
-        }
-        System.out.println(response.toString());
-    }*/
 
     public JSONObject request(String values, String source, String country,
                               String key) {

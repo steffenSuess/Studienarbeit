@@ -34,14 +34,14 @@ public class SearchQueriesAdapter extends ArrayAdapter<SearchQuery> {
 
         SearchQuery searchQuery = getItem(position);
 
-        if(searchQuery != null){
+        if (searchQuery != null) {
             TextView price = (TextView) view.findViewById(R.id.query_price);
             TextView productName = (TextView) view.findViewById(R.id.query_product_name);
             TextView shop_name = (TextView) view.findViewById(R.id.query_shop_name);
-            ImageView productImage = (ImageView)view.findViewById(R.id.query_product_image);
-            TextView callDate = (TextView)view.findViewById(R.id.call_date);
+            ImageView productImage = (ImageView) view.findViewById(R.id.query_product_image);
+            TextView callDate = (TextView) view.findViewById(R.id.call_date);
 
-            if (price != null && shop_name != null && productImage != null && callDate != null && productName != null){
+            if (price != null && shop_name != null && productImage != null && callDate != null && productName != null) {
                 price.setText(searchQuery.getPrice() + " €");
                 shop_name.setText(searchQuery.getShopName());
                 new ImageLoadTask(searchQuery.getImageURL(), productImage).execute();

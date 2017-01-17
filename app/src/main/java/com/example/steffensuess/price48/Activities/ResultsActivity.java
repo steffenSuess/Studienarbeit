@@ -112,17 +112,15 @@ public class ResultsActivity extends AppCompatActivity {
 
 
             searchText = query;
-        }
-
-        else{
+        } else {
             String message = intent.getStringExtra("searchText");
             searchText = message;
         }
 
-        if(searchText != null) {
-            if(searchTextIsEANNumber(searchText)){
+        if (searchText != null) {
+            if (searchTextIsEANNumber(searchText)) {
                 key = "gtin";
-            }else {
+            } else {
                 key = "keyword";
             }
             new ImageLoadTask(noImageFoundURL, productImage).execute();
@@ -138,11 +136,10 @@ public class ResultsActivity extends AppCompatActivity {
     }
 
     private boolean searchTextIsEANNumber(String searchText) {
-        try{
+        try {
             Long.parseLong(searchText);
             return true;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
@@ -248,7 +245,7 @@ public class ResultsActivity extends AppCompatActivity {
 
 
             progressDialog.dismiss();
-            if(offerList.size()>0){
+            if (offerList.size() > 0) {
                 productName.setText(name);
                 OfferAdapter adapter = new OfferAdapter(ResultsActivity.this, R.layout.list_item, offerList);
                 listView.setAdapter(adapter);
@@ -266,10 +263,10 @@ public class ResultsActivity extends AppCompatActivity {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
                 searchQuery.setDate(dateFormat.format(date));
                 db.addQuery(searchQuery);
-                if(searchTextIsEANNumber(searchText))
+                if (searchTextIsEANNumber(searchText))
                     searchText = name;
                 new GetProductImage().execute();
-            }else {
+            } else {
                 alertDialog.show();
             }
 
@@ -277,7 +274,7 @@ public class ResultsActivity extends AppCompatActivity {
         }
     }
 
-    private class GetProductImage extends AsyncTask<Void, Void, Void>{
+    private class GetProductImage extends AsyncTask<Void, Void, Void> {
         final String count = "10";
         final String mkt = "de-de";
 
@@ -292,7 +289,7 @@ public class ResultsActivity extends AppCompatActivity {
             byte[] accountKeyBytes = Base64.encode(accountKey.getBytes(), Base64.DEFAULT);
             String accountKeyEnc = new String(accountKeyBytes);
             try {
-                URL url = new URL("https://api.cognitive.microsoft.com/bing/v5.0/images/search?q="+search+"&count="+count+"&offset=0&mkt="+mkt+"&safeSearch=Moderate&imageType=Transparent");
+                URL url = new URL("https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=" + search + "&count=" + count + "&offset=0&mkt=" + mkt + "&safeSearch=Moderate&imageType=Transparent");
 
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -301,8 +298,7 @@ public class ResultsActivity extends AppCompatActivity {
 
                 int status = urlConnection.getResponseCode();
 
-                System.out.println("Status: " + status + " " +  urlConnection.getErrorStream());
-
+                System.out.println("Status: " + status + " " + urlConnection.getErrorStream());
 
 
                 switch (status) {
@@ -312,17 +308,16 @@ public class ResultsActivity extends AppCompatActivity {
                         StringBuilder sb = new StringBuilder();
                         String line;
                         while ((line = br.readLine()) != null) {
-                            sb.append(line+"\n");
+                            sb.append(line + "\n");
                         }
                         br.close();
                         imageJson = new JSONObject(sb.toString());
                 }
 
-                if(imageJson != null){
+                if (imageJson != null) {
                     JSONObject value = imageJson.getJSONArray("value").getJSONObject(0);
                     imageURL = value.getString("thumbnailUrl");
                 }
-
 
 
             } catch (MalformedURLException e) {
@@ -341,10 +336,10 @@ public class ResultsActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(imageURL != null && !imageURL.isEmpty() && !imageURL.equals("null")){
+            if (imageURL != null && !imageURL.isEmpty() && !imageURL.equals("null")) {
                 new ImageLoadTask(imageURL, productImage).execute();
                 SearchQuery searchQuery;
-                searchQuery = db.getAllQueries().get(db.getQueriesCount()-1);
+                searchQuery = db.getAllQueries().get(db.getQueriesCount() - 1);
                 searchQuery.setImageURL(imageURL);
                 db.updateQuery(searchQuery);
             }

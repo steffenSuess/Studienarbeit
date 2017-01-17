@@ -81,9 +81,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public SearchQuery getQuery(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_SEARCHQUERIES, new String[] { KEY_ID,
-                        KEY_NAME, KEY_IMAGE, KEY_TEXT, KEY_DATE, KEY_PRICE, KEY_SHOP_NAME }, KEY_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
+        Cursor cursor = db.query(TABLE_SEARCHQUERIES, new String[]{KEY_ID,
+                        KEY_NAME, KEY_IMAGE, KEY_TEXT, KEY_DATE, KEY_PRICE, KEY_SHOP_NAME}, KEY_ID + "=?",
+                new String[]{String.valueOf(id)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
 
@@ -134,7 +134,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String countQuery = "SELECT  * FROM " + TABLE_SEARCHQUERIES;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
-        if(cursor != null && !cursor.isClosed()){
+        if (cursor != null && !cursor.isClosed()) {
             count = cursor.getCount();
             cursor.close();
         }
@@ -142,6 +142,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // return count
         return count;
     }
+
     // Updating single Query
     public int updateQuery(SearchQuery query) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -156,13 +157,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // updating row
         return db.update(TABLE_SEARCHQUERIES, values, KEY_ID + " = ?",
-                new String[] { String.valueOf(query.getId()) });
+                new String[]{String.valueOf(query.getId())});
     }
 
     // Deleting single Query
     public void deleteQuery(SearchQuery query) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_SEARCHQUERIES, KEY_ID + " = ?",
-                new String[] { String.valueOf(query.getId()) });
+                new String[]{String.valueOf(query.getId())});
     }
 }

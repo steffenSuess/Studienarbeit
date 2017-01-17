@@ -37,14 +37,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        listView = (ListView)findViewById(R.id.searchquery_list);
+        listView = (ListView) findViewById(R.id.searchquery_list);
 
         //this.deleteDatabase("searchQueriesManager");
         db = new DatabaseHandler(this);
         searchQueries = Lists.reverse(db.getAllQueries());
-        if(searchQueries.size() > 0){
+        if (searchQueries.size() > 0) {
             List<SearchQuery> searchQueryList = new ArrayList<SearchQuery>();
-            for(int i = 0; i < searchQueries.size() && i <= 4; i++){
+            for (int i = 0; i < searchQueries.size() && i <= 4; i++) {
                 searchQueryList.add(searchQueries.get(i));
             }
             SearchQueriesAdapter adapter = new SearchQueriesAdapter(MainActivity.this, R.layout.query_list_item, searchQueryList);
@@ -65,9 +65,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onRestart() {
-            super.onRestart();
-            finish();
-            startActivity(getIntent());
+        super.onRestart();
+        finish();
+        startActivity(getIntent());
     }
 
     @Override
@@ -101,12 +101,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode==0){
-            if(resultCode== CommonStatusCodes.SUCCESS){
-                if(data!=null){
+        if (requestCode == 0) {
+            if (resultCode == CommonStatusCodes.SUCCESS) {
+                if (data != null) {
                     Barcode barcode = data.getParcelableExtra("barcode");
                     ean = barcode.displayValue;
 //                    SearchView searchView =
@@ -117,12 +116,12 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
 
-                }else{
+                } else {
                     ean = "";
                 }
             }
 
-        }else {
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -134,6 +133,4 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-    }
+}

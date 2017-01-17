@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by steffensuess on 19.12.16.
  */
 
-public class Offer implements Serializable{
+public class Offer implements Serializable {
     String shop_Name;
     String price;
     String price_With_Shipping;
@@ -34,7 +34,6 @@ public class Offer implements Serializable{
     }
 
 
-
     public String getProductImage() {
         return productImage;
     }
@@ -42,7 +41,6 @@ public class Offer implements Serializable{
     public void setProductImage(String productImage) {
         this.productImage = productImage;
     }
-
 
 
     public String getShop_Name() {
